@@ -1,0 +1,42 @@
+# ==============================================================================
+# [파일 역할] Ollama Modelfile ── 파인튜닝 파이프라인 마지막 단계: 로컬 서빙 등록
+#   2단계에서 만든 병합 모델(./llama32-3b-style-merged)을 Ollama 모델로 등록하기 위한 설정 파일.
+#   (Docker 의 Dockerfile 처럼 "모델 이미지"를 정의한다고 생각하면 된다)
+#
+# [사용 방법]
+#   1) 이 파일과 같은 폴더에 llama32-3b-style-merged 폴더(safetensors)를 둔다.
+#   2) ollama create intent-classifier -f Modelfile     # 이름은 자유롭게 지정
+#   3) ollama run intent-classifier "내 주문 보여줘"       # 테스트
+#   4) app/ai/sllm_pinetunning/sllm_classification.py 의 "model" 값을
+#      "llama3.2:3b" → "intent-classifier" 로 바꿔야 서버에서 튜닝 모델이 사용된다.
+#
+# [지시문 설명]
+#   FROM      : 기반 모델(로컬 경로 또는 레지스트리 모델명)
+#   PARAMETER : 추론 파라미터 기본값
+#   SYSTEM    : 모든 요청에 자동으로 붙는 시스템 프롬프트
+#
+# ⚠️ 개선 포인트:
+#   - SYSTEM 은 '네 가지'(응답불가합니다 포함) 중 하나를 출력하라고 하지만,
+#     학습 데이터(1단계)에는 get_my_orders / get_my_profile / get_policy 3개 레이블만 있다.
+#     모델은 '응답불가합니다'를 학습한 적이 없으므로 무관한 질문도 3개 중 하나로 답할 가능성이 높다.
+#     → 학습 데이터에 '무관한 질문 → 응답불가합니다' 예시를 추가해야 일관된다.
+#   - 학습 시에는 SYSTEM 프롬프트 없이 학습했으므로 학습/추론 입력 형식이 다르다.
+#   - 폴더 이름 'pinetunning' 은 'fine-tuning' 의 오타로 보인다.
+# ==============================================================================
+
+# 기반 모델: 2단계에서 저장한 병합 모델 폴더(상대경로 → Modelfile 위치 기준)
+FROM ./llama32-3b-style-merged
+
+# temperature 0 → 가장 확률 높은 토큰만 선택(분류 결과를 항상 동일하게)
+PARAMETER temperature 0
+# num_ctx: 컨텍스트 창(입력+출력 최대 토큰). 짧은 질문 분류에는 512 면 충분, 메모리 절약
+PARAMETER num_ctx 512
+# num_predict: 최대 생성 토큰 수. 레이블은 짧으므로 32 로 제한(불필요한 장문 생성 방지)
+PARAMETER num_predict 32
+
+# 모든 요청 앞에 자동으로 붙는 시스템 프롬프트(출력 형식 강제)
+SYSTEM """아래 질문을 읽고 반드시 다음 네 가지 중 하나만 출력해. 다른 말은 절대 하지 마.
+- get_my_orders
+- get_my_profile
+- get_policy
+- 응답불가합니다"""

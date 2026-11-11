@@ -1,0 +1,88 @@
+# ==============================================================================
+# [파일 역할] sLLM LoRA 파인튜닝 전용 패키지 목록 (GPU 학습 서버용)
+#   - 웹 서버용 루트 requirements.txt 와 '별도'로 관리한다(PyTorch/CUDA 등 무거운 패키지).
+#   - 설치: pip install -r requirements.txt
+#   - 원본 파일은 UTF-16(LE) 인코딩이었으며, 호환성을 위해 UTF-8 로 변환해 저장했다.
+#     (pip 는 BOM 이 있으면 UTF-16 도 읽지만, 다른 도구·리눅스 환경에서 깨지기 쉬움)
+#   - 아래 목록 상당수는 pip freeze 로 추출된 '간접 의존성'(직접 import 하지 않음)이다.
+# ⚠️ 개선 포인트: torch 외에는 버전이 고정되지 않아 재현성이 떨어진다(transformers/trl/peft 는
+#    버전 간 인자명이 자주 바뀜 → 예: torch_dtype→dtype, tokenizer→processing_class).
+# ==============================================================================
+
+# CUDA 12.4 용 PyTorch 휠을 받기 위한 추가 패키지 저장소(GPU 학습 환경, RunPod 등)
+--extra-index-url https://download.pytorch.org/whl/cu124
+# PyTorch: 딥러닝 프레임워크(텐서 연산, GPU 학습). torchvision/torchaudio 와 버전을 맞춰 고정
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+# Hugging Face Accelerate: 디바이스 배치(GPU/CPU), 혼합정밀도(bf16) 등 학습 가속 보조
+accelerate
+aiohappyeyeballs
+aiohttp
+aiosignal
+annotated-doc
+anyio
+attrs
+# 4bit/8bit 양자화 라이브러리(QLoRA 등 메모리 절약용. 현재 스크립트에서는 직접 사용 안 함)
+bitsandbytes
+certifi
+charset-normalizer
+click
+colorama
+# Hugging Face Datasets: JSONL 학습 데이터 로드/전처리(load_dataset, map)
+datasets
+dill
+filelock
+frozenlist
+fsspec
+h11
+hf-xet
+httpcore
+httpx
+# Hugging Face Hub: 로그인, 모델 업로드/다운로드(3단계 업로드에서 사용)
+huggingface_hub
+idna
+Jinja2
+markdown-it-py
+MarkupSafe
+mdurl
+mpmath
+multidict
+multiprocess
+networkx
+# 수치 연산 기본 라이브러리
+numpy
+packaging
+# 표 형태 데이터 처리(datasets 의존성)
+pandas
+# PEFT: LoRA 등 경량 파인튜닝(LoraConfig, PeftModel, merge_and_unload)
+peft
+propcache
+psutil
+pyarrow
+Pygments
+python-dateutil
+PyYAML
+regex
+# HTTP 클라이언트: Ollama REST API 호출(4단계 베이스 모델 테스트)
+requests
+rich
+# 안전하고 빠른 모델 가중치 저장 형식(.safetensors)
+safetensors
+setuptools
+shellingham
+six
+sympy
+# 고속(Rust) 토크나이저 엔진(use_fast=True)
+tokenizers
+tqdm
+# Hugging Face Transformers: 모델/토크나이저 로드, 추론(generate)
+transformers
+# TRL: SFTTrainer/SFTConfig 로 지도학습 파인튜닝을 간편하게 수행
+trl
+typer
+typing_extensions
+tzdata
+urllib3
+xxhash
+yarl

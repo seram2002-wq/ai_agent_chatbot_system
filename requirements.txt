@@ -1,0 +1,31 @@
+# ==============================================================================
+# requirements.txt — FastAPI 웹서버 + AI(LLM/RAG/캐시) 의존성 목록
+# 설치: python -m venv .venv  →  (가상환경 활성화)  →  pip install -r requirements.txt
+# ※ sLLM 파인튜닝(GPU) 의존성은 app/ai/sllm_pinetunning/finetunning/requirements.txt 에 별도 관리
+# ⚠️ `pip freeze > requirements.lock` 또는 `fastapi==0.x.y` 처럼 버전 고정을 권장
+# ==============================================================================
+
+# ───────────── webserver ─────────────
+fastapi                # 웹 프레임워크 (라우팅, 의존성 주입, 자동 Swagger 문서)
+uvicorn[standard]      # ASGI 서버 (uvicorn app.main:app --reload)
+sqlalchemy # ORM
+psycopg2-binary # PostgreSQL driver  (SQLAlchemy 엔진용 동기 드라이버, app/database.py)
+python-jose[cryptography] # JWT encode/decode  (app/services/auth.py)
+bcrypt # password hashing
+python-dotenv # load .env
+pydantic[email] # data validation  ([email] → EmailStr 검증용 email-validator 포함)
+
+# ───────────── ai tool ─────────────
+openai # OpenAI API client  (Function Calling 분류, 응답 생성)
+pgvector # vector similarity search extension for PostgreSQL  (DB 서버에도 pgvector 확장 설치 필요)
+langchain # LLM orchestration framework
+langchain-openai  # LangChain + OpenAI integration  (ChatOpenAI, OpenAIEmbeddings)
+langchain-postgres # LangChain + PostgreSQL vector store  (PGVector)
+langchain-text-splitters # LangChain chunking utility  (RecursiveCharacterTextSplitter)
+langchain-community # BM25Retriever
+rank-bm25 # BM25 algorithm (langchain-community BM25Retriever related)
+
+
+# ───────────── Redis cache ─────────────
+redis[hiredis]   # Redis 클라이언트 (+ hiredis C 파서로 성능 향상). 서버는 RediSearch 포함된 Redis Stack 필요
+numpy            # 임베딩 벡터 → float32 bytes 변환 (semantic_cache.py)

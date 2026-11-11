@@ -1,0 +1,40 @@
+# ==============================================================================
+# .gitignore — Git 이 추적하지 않을 파일/폴더 패턴
+# ==============================================================================
+
+# 가상환경 (각자 PC 에서 pip install 로 재생성하므로 저장소에 올리지 않음)
+.venv/
+venv/
+env/
+
+# # 환경변수 (보안)
+# .env 에는 DATABASE_URL(DB 비밀번호), SECRET_KEY(JWT 서명키), OPENAI_API_KEY 등 비밀값이 들어 있습니다.
+# 키 이름만 적은 `.env.example` 을 저장소에 올리는 것이 일반적입니다.
+.env
+
+# Python 캐시 (실행 시 자동 생성되는 바이트코드)
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 빌드/배포 산출물
+dist/
+build/
+*.egg-info/
+
+# IDE 설정 (개인 환경별로 다름)
+.vscode/
+.idea/
+*.iml
+
+# OS 가 만드는 메타파일
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# pytest / 커버리지 산출물
+.pytest_cache/
+.coverage
+htmlcov/
